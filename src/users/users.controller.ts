@@ -11,7 +11,7 @@ export class UsersController {
     async getUsers(@Res() res: Response) {
         try {
             const users = await this.userService.getUsers()
-            if (!users.length) {
+            if (users.length === 0) {
                 res.status(404).json({ statusCode: 404, message: 'Users not found', error: 'Not Found' })
                 return
             }
