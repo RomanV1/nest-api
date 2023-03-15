@@ -42,7 +42,7 @@ export class UsersController {
     @Get(':id')
     async getUserById(@Res() res: Response, @Param('id') id: number) {
         try {
-            if (!Number(id)) {
+            if (isNaN(id)) {
                 res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
                 return
             }
@@ -63,13 +63,13 @@ export class UsersController {
     @Delete(':id')
     async deleteUser(@Res() res: Response, @Param('id') id: number) {
         try {
-            if (!Number(id)) {
+            if (isNaN(id)) {
                 res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
                 return
             }
 
-            const user = await this.userService.getUserById(id)
-            if (user === null) {
+            const findUser = await this.userService.getUserById(id)
+            if (findUser === null) {
                 res.status(404).json({ statusCode: 404, message: 'User is not found', error: 'Not found' })
                 return
             }
@@ -85,6 +85,19 @@ export class UsersController {
     @Patch(':id')
     async updateUser(@Res() res: Response, @Param('id') id: number, @Body() user: UpdateUserDto) {
         try {
+            if (isNaN(id)) {
+                res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
+                return
+            }
+
+            const findUser = await this.userService.getUserById(id)
+            if (findUser === null) {
+                res.status(404).json({ statusCode: 404, message: 'User is not found', error: 'Not found' })
+                return
+            }
+
+            const updatedUser = await this.userService.updateUser(id, user)
+            res.status(201).json({ statusCode: 200, message: 'User has been updated', updatedUser: updatedUser })
         } catch (e) {
             console.log(e)
             throw new InternalServerErrorException()

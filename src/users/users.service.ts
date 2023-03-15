@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { User } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
-import { CreateUserDto } from './dto/users.dto'
+import { CreateUserDto, UpdateUserDto } from './dto/users.dto'
 import * as bcrypt from 'bcrypt'
 import { config } from 'dotenv'
 config()
@@ -10,7 +10,7 @@ config()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getUsers(): Promise<User[]> {
+    async getUsers() {
         return this.prisma.user.findMany()
     }
 
@@ -53,6 +53,17 @@ export class UsersService {
         return this.prisma.user.delete({
             where: {
                 id: id,
+            },
+        })
+    }
+
+    async updateUser(id: number, userDto: UpdateUserDto): Promise<UpdateUserDto> {
+        return this.prisma.user.update({
+            where: {
+                id: id,
+            },
+            data: {
+                ...userDto,
             },
         })
     }
