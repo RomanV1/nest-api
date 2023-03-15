@@ -15,13 +15,17 @@ export class UsersService {
     }
 
     async createUser(userDto: CreateUserDto): Promise<User> {
-        const hash: string = await bcrypt.hash(userDto.password, Number(process.env.SALT_ROUND))
+        const hash = await this.createHash(userDto.password)
         return this.prisma.user.create({
             data: {
                 ...userDto,
                 password: hash,
             },
         })
+    }
+
+    async createHash(password: string): Promise<string> {
+        return bcrypt.hash(password, Number(process.env.SALT_ROUND))
     }
 
     async isUserExist(userDto: CreateUserDto): Promise<boolean> {

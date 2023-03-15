@@ -53,7 +53,7 @@ export class UsersController {
                 return
             }
 
-            res.status(201).json({ statusCode: 200, user: user })
+            res.status(200).json({ statusCode: 200, user: user })
         } catch (e) {
             console.log(e)
             throw new InternalServerErrorException()
@@ -75,7 +75,7 @@ export class UsersController {
             }
 
             const deletedUser = await this.userService.deleteUser(id)
-            res.status(201).json({ statusCode: 200, message: 'User has been deleted', deletedUser: deletedUser })
+            res.status(200).json({ statusCode: 200, message: 'User has been deleted', deletedUser: deletedUser })
         } catch (e) {
             console.log(e)
             throw new InternalServerErrorException()
@@ -96,8 +96,12 @@ export class UsersController {
                 return
             }
 
+            if (user.password !== undefined) {
+                user.password = await this.userService.createHash(user.password)
+            }
+
             const updatedUser = await this.userService.updateUser(id, user)
-            res.status(201).json({ statusCode: 200, message: 'User has been updated', updatedUser: updatedUser })
+            res.status(200).json({ statusCode: 200, message: 'User has been updated', updatedUser: updatedUser })
         } catch (e) {
             console.log(e)
             throw new InternalServerErrorException()
