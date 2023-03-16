@@ -47,28 +47,20 @@ export class UsersService {
 
     async getUserById(id: number): Promise<User | null> {
         return this.prisma.user.findFirst({
-            where: {
-                id: id,
-            },
+            where: { id },
         })
     }
 
     async deleteUser(id: number): Promise<User> {
         return this.prisma.user.delete({
-            where: {
-                id: id,
-            },
+            where: { id },
         })
     }
 
     async updateUser(id: number, userDto: UpdateUserDto): Promise<UpdateUserDto> {
         return this.prisma.user.update({
-            where: {
-                id: id,
-            },
-            data: {
-                ...userDto,
-            },
+            where: { id },
+            data: userDto,
         })
     }
 }
