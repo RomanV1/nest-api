@@ -2,7 +2,9 @@ import { Body, Controller, Delete, Get, InternalServerErrorException, Param, Pat
 import { Response } from 'express'
 import { UsersService } from './users.service'
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
     constructor(private userService: UsersService) {}
