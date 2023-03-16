@@ -110,3 +110,5 @@ dist
 .prettierrc
 
 docker-compose.yml
+
+Dockerfile
