@@ -1,112 +1,109 @@
-import { Body, Controller, Delete, Get, InternalServerErrorException, Param, Patch, Post, Res } from '@nestjs/common'
-import { Response } from 'express'
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common'
 import { UsersService } from './users.service'
-import { CreateUserDto, UpdateUserDto } from './dto/users.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { CreateUserDto, UpdateUserDto, BaseUserResponse } from './dto/users.dto'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
+import { User } from './dto/user.entity'
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-    constructor(private userService: UsersService) {}
+    constructor(private readonly userService: UsersService) {}
 
     @Get()
-    async getUsers(@Res() res: Response) {
-        try {
-            const users = await this.userService.getUsers()
-            if (users.length === 0) {
-                res.status(404).json({ statusCode: 404, message: 'Users not found', error: 'Not Found' })
-                return
-            }
-
-            res.status(200).json(users)
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+    @ApiResponse({
+        status: 200,
+        type: [User],
+        description: 'Get all users',
+    })
+    async getUsers(): Promise<User[]> {
+        const users = await this.userService.getUsers()
+        if (users.length === 0) {
+            throw new NotFoundException('Users is not found')
         }
+
+        return plainToInstance(User, users)
     }
 
     @Post()
-    async createUser(@Res() res: Response, @Body() user: CreateUserDto) {
-        try {
-            if (await this.userService.isUserExist(user)) {
-                res.status(409).json({ statusCode: 409, message: 'User already exist. Change your login or email', error: 'Conflict' })
-                return
-            }
-
-            const createdUser = await this.userService.createUser(user)
-            res.status(201).json({ statusCode: 201, message: 'User has been created', createdUser: createdUser })
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+    @ApiResponse({
+        status: 201,
+        type: BaseUserResponse,
+        description: 'Created user',
+    })
+    async createUser(@Body() user: CreateUserDto): Promise<BaseUserResponse> {
+        if (await this.userService.isUserExist(user)) {
+            throw new BadRequestException('User already exist. Change your login or email')
         }
+
+        const createdUser = await this.userService.createUser(user)
+        return plainToInstance(BaseUserResponse, { message: 'User has been created', user: createdUser })
     }
 
     @Get(':id')
-    async getUserById(@Res() res: Response, @Param('id') id: number) {
-        try {
-            if (isNaN(id)) {
-                res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
-                return
-            }
-
-            const user = await this.userService.getUserById(id)
-            if (user === null) {
-                res.status(404).json({ statusCode: 404, message: 'User is not found', error: 'Not found' })
-                return
-            }
-
-            res.status(200).json({ statusCode: 200, user: user })
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+    @ApiResponse({
+        status: 200,
+        type: User,
+        description: 'Get user by id',
+    })
+    async getUserById(@Param('id') id: number): Promise<User> {
+        if (isNaN(id)) {
+            throw new BadRequestException('id must be a number')
         }
+
+        const user = await this.userService.getUserById(id)
+        if (user === null) {
+            throw new NotFoundException('User is not found')
+        }
+
+        return plainToInstance(User, user)
     }
 
     @Delete(':id')
-    async deleteUser(@Res() res: Response, @Param('id') id: number) {
-        try {
-            if (isNaN(id)) {
-                res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
-                return
-            }
-
-            const findUser = await this.userService.getUserById(id)
-            if (findUser === null) {
-                res.status(404).json({ statusCode: 404, message: 'User is not found', error: 'Not found' })
-                return
-            }
-
-            const deletedUser = await this.userService.deleteUser(id)
-            res.status(200).json({ statusCode: 200, message: 'User has been deleted', deletedUser: deletedUser })
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+    @ApiResponse({
+        status: 200,
+        type: BaseUserResponse,
+        description: 'Delete user by id',
+    })
+    async deleteUser(@Param('id') id: number): Promise<BaseUserResponse> {
+        if (isNaN(id)) {
+            throw new BadRequestException('id must be a number')
         }
+
+        const findUser = await this.userService.getUserById(id)
+        if (findUser === null) {
+            throw new NotFoundException('User is not found')
+        }
+
+        const deletedUser = await this.userService.deleteUser(id)
+        return plainToInstance(BaseUserResponse, { message: 'User has been deleted', user: deletedUser })
     }
 
     @Patch(':id')
-    async updateUser(@Res() res: Response, @Param('id') id: number, @Body() user: UpdateUserDto) {
-        try {
-            if (isNaN(id)) {
-                res.status(400).json({ statusCode: 400, message: 'id must be a number', error: 'Bad Request' })
-                return
-            }
-
-            const findUser = await this.userService.getUserById(id)
-            if (findUser === null) {
-                res.status(404).json({ statusCode: 404, message: 'User is not found', error: 'Not found' })
-                return
-            }
-
-            if (user.password !== undefined) {
-                user.password = await this.userService.createHash(user.password)
-            }
-
-            const updatedUser = await this.userService.updateUser(id, user)
-            res.status(200).json({ statusCode: 200, message: 'User has been updated', updatedUser: updatedUser })
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+    @ApiResponse({
+        status: 200,
+        type: BaseUserResponse,
+        description: 'Update user by id',
+    })
+    async updateUser(@Param('id') id: number, @Body() user: UpdateUserDto): Promise<BaseUserResponse> {
+        if (isNaN(id)) {
+            throw new BadRequestException('id must be a number')
         }
+
+        if (user.login === undefined && user.email === undefined && user.password === undefined) {
+            throw new BadRequestException('Request body must not be empty')
+        }
+
+        const findUser = await this.userService.getUserById(id)
+        if (findUser === null) {
+            throw new NotFoundException('User is not found')
+        }
+
+        if (user.password !== undefined) {
+            user.password = await this.userService.createHash(user.password)
+        }
+
+        const updatedUser = await this.userService.updateUser(id, user)
+        return plainToInstance(BaseUserResponse, { message: 'User has been updated', user: updatedUser })
     }
 }
