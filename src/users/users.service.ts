@@ -10,57 +10,92 @@ config()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getUsers() {
-        return this.prisma.user.findMany()
+    async getUsers(): Promise<User[]> {
+        try {
+            return this.prisma.user.findMany()
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async createUser(userDto: CreateUserDto): Promise<User> {
         const hash = await this.createHash(userDto.password)
-        return this.prisma.user.create({
-            data: {
-                ...userDto,
-                password: hash,
-            },
-        })
+        try {
+            return this.prisma.user.create({
+                data: {
+                    ...userDto,
+                    password: hash,
+                },
+            })
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async createHash(password: string): Promise<string> {
-        return bcrypt.hash(password, Number(process.env.SALT_ROUND))
+        try {
+            return bcrypt.hash(password, Number(process.env.SALT_ROUND))
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async isUserExist(userDto: CreateUserDto): Promise<boolean> {
-        const user = await this.prisma.user.findFirst({
-            where: {
-                OR: [
-                    {
-                        login: userDto.login,
-                    },
-                    {
-                        email: userDto.email,
-                    },
-                ],
-            },
-        })
+        try {
+            const user = await this.prisma.user.findFirst({
+                where: {
+                    OR: [
+                        {
+                            login: userDto.login,
+                        },
+                        {
+                            email: userDto.email,
+                        },
+                    ],
+                },
+            })
 
-        return user !== null
+            return user !== null
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async getUserById(id: number): Promise<User | null> {
-        return this.prisma.user.findFirst({
-            where: { id },
-        })
+        try {
+            return this.prisma.user.findFirst({
+                where: { id },
+            })
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async deleteUser(id: number): Promise<User> {
-        return this.prisma.user.delete({
-            where: { id },
-        })
+        try {
+            return this.prisma.user.delete({
+                where: { id },
+            })
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 
     async updateUser(id: number, userDto: UpdateUserDto): Promise<UpdateUserDto> {
-        return this.prisma.user.update({
-            where: { id },
-            data: userDto,
-        })
+        try {
+            return this.prisma.user.update({
+                where: { id },
+                data: userDto,
+            })
+        } catch (e) {
+            console.log(e)
+            throw new Error()
+        }
     }
 }
