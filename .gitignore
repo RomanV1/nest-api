@@ -108,7 +108,3 @@ dist
 .idea
 
 .prettierrc
-
-docker-compose.yml
-
-Dockerfile
