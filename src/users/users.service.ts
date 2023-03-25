@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { User } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto'
@@ -8,13 +8,14 @@ config()
 
 @Injectable()
 export class UsersService {
+    private readonly logger = new Logger(UsersService.name)
     constructor(private readonly prisma: PrismaService) {}
 
     async getUsers(): Promise<User[]> {
         try {
             return this.prisma.user.findMany()
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -29,7 +30,7 @@ export class UsersService {
                 },
             })
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -38,7 +39,7 @@ export class UsersService {
         try {
             return bcrypt.hash(password, Number(process.env.SALT_ROUND))
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -60,7 +61,7 @@ export class UsersService {
 
             return user !== null
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -71,7 +72,7 @@ export class UsersService {
                 where: { id },
             })
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -82,7 +83,7 @@ export class UsersService {
                 where: { id },
             })
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
@@ -94,7 +95,7 @@ export class UsersService {
                 data: userDto,
             })
         } catch (e) {
-            console.log(e)
+            this.logger.error(e.message, e.stack)
             throw new Error()
         }
     }
