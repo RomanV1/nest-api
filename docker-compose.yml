@@ -1,0 +1,36 @@
+version: '3.0'
+
+services:
+    app:
+        container_name: app
+        build:
+            context: .
+        env_file:
+            -   .env
+        volumes:
+            -   .:/app
+            -   /app/node_modules
+        ports:
+            - ${PORT}:${PORT}
+        command: npm run start:migrate:dev
+        depends_on:
+            -   postgres
+        restart: always
+    postgres:
+        container_name: postgres
+        image: postgres:15.2-alpine
+        environment:
+            POSTGRES_USER: ${PG_USER}
+            POSTGRES_PASSWORD: ${PG_PASSWORD}
+            POSTGRES_DATABASE: ${PG_DATABASE}
+            PGDATA: /data/postgres
+        volumes:
+            - postgres-db:/data/postgres
+        ports:
+            - ${DATABASE_PORT}:${DATABASE_PORT}
+        restart: always
+
+
+volumes:
+    postgres-db:
+        driver: local
