@@ -1,7 +1,9 @@
 # nest-api
-> Nest + Prisma + Postgres
-## Installation
+> Default CRUD
 
+> Nest + Prisma + Postgres
+
+## Installation
 ```bash
 $ npm install
 ```
@@ -17,7 +19,6 @@ $ docker-compose up -d
 
 
 ## Test
-
 ```bash
 # unit tests
 $ npm run test
