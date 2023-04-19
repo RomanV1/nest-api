@@ -1,6 +1,6 @@
-import { IsDefined, IsEmail, IsString, Length, MinLength } from 'class-validator'
-import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { User } from './user.entity'
+import { IsDefined, IsEmail, IsString, Length, MinLength } from 'class-validator';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { User } from './user.entity';
 
 export class CreateUserDto {
     @ApiProperty({
@@ -9,7 +9,7 @@ export class CreateUserDto {
     @IsString()
     @IsDefined()
     @Length(3, 20)
-    login: string
+    login: string;
 
     @ApiProperty({
         example: 'user@gmail.com',
@@ -18,7 +18,7 @@ export class CreateUserDto {
     @IsDefined()
     @IsEmail()
     @MinLength(5)
-    email: string
+    email: string;
 
     @ApiProperty({
         example: '12345678',
@@ -26,15 +26,15 @@ export class CreateUserDto {
     @IsString()
     @IsDefined()
     @MinLength(8)
-    password: string
+    password: string;
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
 export class BaseUserResponse {
     @ApiProperty({ example: 'User has been created/deleted/updated' })
-    message: string
+    message: string;
 
     @ApiProperty({ example: User })
-    user: User
+    user: User;
 }

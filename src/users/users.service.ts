@@ -1,46 +1,46 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { User } from '@prisma/client'
-import { PrismaService } from '../prisma/prisma.service'
-import { CreateUserDto, UpdateUserDto } from './dto/users.dto'
-import * as bcrypt from 'bcrypt'
-import { config } from 'dotenv'
-config()
+import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
+import * as bcrypt from 'bcrypt';
+import { config } from 'dotenv';
+config();
 
 @Injectable()
 export class UsersService {
-    private readonly logger = new Logger(UsersService.name)
     constructor(private readonly prisma: PrismaService) {}
 
-    async getUsers(): Promise<User[]> {
+    async getUsers(): Promise<User[] | null> {
         try {
-            return this.prisma.user.findMany()
+            const users = await this.prisma.user.findMany();
+            return users;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method getUsers \n${e.message}`);
         }
     }
 
     async createUser(userDto: CreateUserDto): Promise<User> {
-        const hash = await this.createHash(userDto.password)
+        const hash = await this.createHash(userDto.password);
         try {
-            return this.prisma.user.create({
+            const user = await this.prisma.user.create({
                 data: {
                     ...userDto,
                     password: hash,
                 },
-            })
+            });
+
+            return user;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method createUser \n${e.message}`);
         }
     }
 
     async createHash(password: string): Promise<string> {
         try {
-            return bcrypt.hash(password, Number(process.env.SALT_ROUND))
+            const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUND));
+            return hash;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method createHash \n${e.message}`);
         }
     }
 
@@ -57,46 +57,48 @@ export class UsersService {
                         },
                     ],
                 },
-            })
+            });
 
-            return user !== null
+            return user !== null;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method isUserExist \n${e.message}`);
         }
     }
 
     async getUserById(id: number): Promise<User | null> {
         try {
-            return this.prisma.user.findFirst({
+            const user = await this.prisma.user.findFirst({
                 where: { id },
-            })
+            });
+
+            return user;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method getUserById \n${e.message}`);
         }
     }
 
-    async deleteUser(id: number): Promise<User> {
+    async deleteUser(id: number): Promise<User | null> {
         try {
-            return this.prisma.user.delete({
+            const user = await this.prisma.user.delete({
                 where: { id },
-            })
+            });
+
+            return user;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method deleteUser \n${e.message}`);
         }
     }
 
-    async updateUser(id: number, userDto: UpdateUserDto): Promise<UpdateUserDto> {
+    async updateUser(id: number, userDto: UpdateUserDto): Promise<User | null> {
         try {
-            return this.prisma.user.update({
+            const user = await this.prisma.user.update({
                 where: { id },
                 data: userDto,
-            })
+            });
+
+            return user;
         } catch (e) {
-            this.logger.error(e.message, e.stack)
-            throw new Error()
+            throw new Error(`class UsersService method updateUser \n${e.message}`);
         }
     }
 }

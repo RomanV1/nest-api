@@ -1,9 +1,9 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common'
-import { UsersService } from './users.service'
-import { CreateUserDto, UpdateUserDto, BaseUserResponse } from './dto/users.dto'
-import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { plainToInstance } from 'class-transformer'
-import { User } from './dto/user.entity'
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto, UpdateUserDto, BaseUserResponse } from './dto/users.dto';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
+import { User } from './dto/user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -17,12 +17,12 @@ export class UsersController {
         description: 'Get all users',
     })
     async getUsers(): Promise<User[]> {
-        const users = await this.userService.getUsers()
+        const users = await this.userService.getUsers();
         if (users.length === 0) {
-            throw new NotFoundException('Users is not found')
+            throw new NotFoundException('Users is not found');
         }
 
-        return plainToInstance(User, users)
+        return plainToInstance(User, users);
     }
 
     @Post()
@@ -33,11 +33,11 @@ export class UsersController {
     })
     async createUser(@Body() user: CreateUserDto): Promise<BaseUserResponse> {
         if (await this.userService.isUserExist(user)) {
-            throw new BadRequestException('User already exist. Change your login or email')
+            throw new BadRequestException('User already exist. Change your login or email');
         }
 
-        const createdUser = await this.userService.createUser(user)
-        return plainToInstance(BaseUserResponse, { message: 'User has been created', user: createdUser })
+        const createdUser = await this.userService.createUser(user);
+        return plainToInstance(BaseUserResponse, { message: 'User has been created', user: createdUser });
     }
 
     @Get(':id')
@@ -48,15 +48,15 @@ export class UsersController {
     })
     async getUserById(@Param('id') id: number): Promise<User> {
         if (isNaN(id)) {
-            throw new BadRequestException('id must be a number')
+            throw new BadRequestException('id must be a number');
         }
 
-        const user = await this.userService.getUserById(id)
+        const user = await this.userService.getUserById(id);
         if (user === null) {
-            throw new NotFoundException('User is not found')
+            throw new NotFoundException('User is not found');
         }
 
-        return plainToInstance(User, user)
+        return plainToInstance(User, user);
     }
 
     @Delete(':id')
@@ -67,16 +67,16 @@ export class UsersController {
     })
     async deleteUser(@Param('id') id: number): Promise<BaseUserResponse> {
         if (isNaN(id)) {
-            throw new BadRequestException('id must be a number')
+            throw new BadRequestException('id must be a number');
         }
 
-        const findUser = await this.userService.getUserById(id)
+        const findUser = await this.userService.getUserById(id);
         if (findUser === null) {
-            throw new NotFoundException('User is not found')
+            throw new NotFoundException('User is not found');
         }
 
-        const deletedUser = await this.userService.deleteUser(id)
-        return plainToInstance(BaseUserResponse, { message: 'User has been deleted', user: deletedUser })
+        const deletedUser = await this.userService.deleteUser(id);
+        return plainToInstance(BaseUserResponse, { message: 'User has been deleted', user: deletedUser });
     }
 
     @Patch(':id')
@@ -87,23 +87,23 @@ export class UsersController {
     })
     async updateUser(@Param('id') id: number, @Body() user: UpdateUserDto): Promise<BaseUserResponse> {
         if (isNaN(id)) {
-            throw new BadRequestException('id must be a number')
+            throw new BadRequestException('id must be a number');
         }
 
         if (user.login === undefined && user.email === undefined && user.password === undefined) {
-            throw new BadRequestException('Request body must not be empty')
+            throw new BadRequestException('Request body must not be empty');
         }
 
-        const findUser = await this.userService.getUserById(id)
+        const findUser = await this.userService.getUserById(id);
         if (findUser === null) {
-            throw new NotFoundException('User is not found')
+            throw new NotFoundException('User is not found');
         }
 
         if (user.password !== undefined) {
-            user.password = await this.userService.createHash(user.password)
+            user.password = await this.userService.createHash(user.password);
         }
 
-        const updatedUser = await this.userService.updateUser(id, user)
-        return plainToInstance(BaseUserResponse, { message: 'User has been updated', user: updatedUser })
+        const updatedUser = await this.userService.updateUser(id, user);
+        return plainToInstance(BaseUserResponse, { message: 'User has been updated', user: updatedUser });
     }
 }
