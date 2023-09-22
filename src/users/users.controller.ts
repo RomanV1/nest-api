@@ -27,12 +27,11 @@ export class UsersController {
         description: 'Created user',
     })
     async createUser(@Body() user: CreateUserDto): Promise<BaseUserResponse> {
-        if (await this.userService.isUserExist(user)) {
-            throw new BadRequestException('User already exist. Change your login or email');
-        }
-
-        const createdUser = await this.userService.createUser(user);
-        return plainToInstance(BaseUserResponse, { message: 'User has been created', user: createdUser });
+        const createdUser: UserEntity = await this.userService.createUser(user);
+        return {
+            message: 'User has been created',
+            user: createdUser,
+        };
     }
 
     @Get(':id')

@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 import bcrypt from 'bcrypt';
@@ -24,10 +23,15 @@ export class UsersService {
         }
     }
 
-    async createUser(userDto: CreateUserDto): Promise<User> {
-        const hash = await this.createHash(userDto.password);
+    async createUser(userDto: CreateUserDto): Promise<UserEntity> {
+        const isUserExist: boolean = await this.isUserExist(userDto.login, userDto.email);
+        if (isUserExist) {
+            throw new BadRequestException('User already exist. Change your login or email');
+        }
+
+        const hash: string = await this.createHash(userDto.password);
         try {
-            const user = await this.prisma.user.create({
+            const user: UserEntity = await this.prisma.user.create({
                 data: {
                     ...userDto,
                     password: hash,
@@ -36,41 +40,34 @@ export class UsersService {
 
             return user;
         } catch (err) {
-            throw new Error(`class UsersService method createUser \n${err.message}`);
+            throw new Error(err);
         }
     }
 
     async createHash(password: string): Promise<string> {
         try {
-            const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUND));
+            const hash: string = await bcrypt.hash(password, Number(process.env.SALT_ROUND));
             return hash;
         } catch (err) {
             throw new Error(err);
         }
     }
 
-    async isUserExist(userDto: CreateUserDto): Promise<boolean> {
+    private async isUserExist(login: string, email: string): Promise<boolean> {
         try {
-            const user = await this.prisma.user.findFirst({
+            const user: UserEntity = await this.prisma.user.findFirst({
                 where: {
-                    OR: [
-                        {
-                            login: userDto.login,
-                        },
-                        {
-                            email: userDto.email,
-                        },
-                    ],
+                    OR: [{ login }, { email }],
                 },
             });
 
-            return user !== null;
+            return !!user;
         } catch (err) {
             throw new Error(err);
         }
     }
 
-    async getUserById(id: number): Promise<User> {
+    async getUserById(id: number): Promise<UserEntity> {
         try {
             const user = await this.prisma.user.findFirst({
                 where: { id },
@@ -82,7 +79,7 @@ export class UsersService {
         }
     }
 
-    async deleteUser(id: number): Promise<User> {
+    async deleteUser(id: number): Promise<UserEntity> {
         try {
             const user = await this.prisma.user.delete({
                 where: { id },
@@ -94,7 +91,7 @@ export class UsersService {
         }
     }
 
-    async updateUser(id: number, userDto: UpdateUserDto): Promise<User> {
+    async updateUser(id: number, userDto: UpdateUserDto): Promise<UserEntity> {
         try {
             const user = await this.prisma.user.update({
                 where: { id },
