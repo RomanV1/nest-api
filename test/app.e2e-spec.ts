@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { User } from '../src/users/dto/user.entity';
+import { UserEntity } from '../src/users/dto/user.entity';
 import { plainToInstance } from 'class-transformer';
 
 describe('AppController (e2e)', () => {
@@ -35,7 +35,7 @@ describe('AppController (e2e)', () => {
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .then((res) => {
-                    expect(plainToInstance(User, res.body)).toBeInstanceOf(User);
+                    expect(plainToInstance(UserEntity, res.body)).toBeInstanceOf(UserEntity);
                 });
         });
 
@@ -56,7 +56,7 @@ describe('AppController (e2e)', () => {
                 .expect('Content-Type', /json/)
                 .expect(201)
                 .then((res) => {
-                    expect(plainToInstance(User, res.body)).toBeInstanceOf(User);
+                    expect(plainToInstance(UserEntity, res.body)).toBeInstanceOf(UserEntity);
                 });
         });
 
@@ -94,7 +94,7 @@ describe('AppController (e2e)', () => {
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .then((res) => {
-                    expect(plainToInstance(User, res.body)).toBeInstanceOf(User);
+                    expect(plainToInstance(UserEntity, res.body)).toBeInstanceOf(UserEntity);
                 });
         });
 

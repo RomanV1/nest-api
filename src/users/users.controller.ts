@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, BaseUserResponse } from './dto/users.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { User } from './dto/user.entity';
+import { UserEntity } from './dto/user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -13,16 +13,11 @@ export class UsersController {
     @Get()
     @ApiResponse({
         status: 200,
-        type: [User],
+        type: [UserEntity],
         description: 'Get all users',
     })
-    async getUsers(): Promise<User[]> {
-        const users = await this.userService.getUsers();
-        if (users.length === 0) {
-            throw new NotFoundException('Users is not found');
-        }
-
-        return plainToInstance(User, users);
+    async getUsers(): Promise<UserEntity[]> {
+        return this.userService.getUsers();
     }
 
     @Post()
@@ -43,10 +38,10 @@ export class UsersController {
     @Get(':id')
     @ApiResponse({
         status: 200,
-        type: User,
+        type: UserEntity,
         description: 'Get user by id',
     })
-    async getUserById(@Param('id') id: number): Promise<User> {
+    async getUserById(@Param('id') id: number): Promise<UserEntity> {
         if (isNaN(id)) {
             throw new BadRequestException('id must be a number');
         }
@@ -56,7 +51,7 @@ export class UsersController {
             throw new NotFoundException('User is not found');
         }
 
-        return plainToInstance(User, user);
+        return plainToInstance(UserEntity, user);
     }
 
     @Delete(':id')
