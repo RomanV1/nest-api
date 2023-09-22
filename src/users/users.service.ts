@@ -1,21 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { config } from 'dotenv';
+import { UserEntity } from './dto/user.entity';
 config();
 
 @Injectable()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getUsers(): Promise<User[] | null> {
+    async getUsers(): Promise<UserEntity[]> {
         try {
-            const users = await this.prisma.user.findMany();
+            const users: UserEntity[] = await this.prisma.user.findMany();
+            if (users.length === 0) {
+                throw new NotFoundException('No users found');
+            }
+
             return users;
-        } catch (e) {
-            throw new Error(`class UsersService method getUsers \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 
@@ -30,8 +35,8 @@ export class UsersService {
             });
 
             return user;
-        } catch (e) {
-            throw new Error(`class UsersService method createUser \n${e.message}`);
+        } catch (err) {
+            throw new Error(`class UsersService method createUser \n${err.message}`);
         }
     }
 
@@ -39,8 +44,8 @@ export class UsersService {
         try {
             const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUND));
             return hash;
-        } catch (e) {
-            throw new Error(`class UsersService method createHash \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 
@@ -60,36 +65,36 @@ export class UsersService {
             });
 
             return user !== null;
-        } catch (e) {
-            throw new Error(`class UsersService method isUserExist \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 
-    async getUserById(id: number): Promise<User | null> {
+    async getUserById(id: number): Promise<User> {
         try {
             const user = await this.prisma.user.findFirst({
                 where: { id },
             });
 
             return user;
-        } catch (e) {
-            throw new Error(`class UsersService method getUserById \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 
-    async deleteUser(id: number): Promise<User | null> {
+    async deleteUser(id: number): Promise<User> {
         try {
             const user = await this.prisma.user.delete({
                 where: { id },
             });
 
             return user;
-        } catch (e) {
-            throw new Error(`class UsersService method deleteUser \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 
-    async updateUser(id: number, userDto: UpdateUserDto): Promise<User | null> {
+    async updateUser(id: number, userDto: UpdateUserDto): Promise<User> {
         try {
             const user = await this.prisma.user.update({
                 where: { id },
@@ -97,8 +102,8 @@ export class UsersService {
             });
 
             return user;
-        } catch (e) {
-            throw new Error(`class UsersService method updateUser \n${e.message}`);
+        } catch (err) {
+            throw new Error(err);
         }
     }
 }
