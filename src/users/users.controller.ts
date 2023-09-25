@@ -45,7 +45,7 @@ export class UsersController {
             throw new BadRequestException('id must be a number');
         }
 
-        const user = await this.userService.getUserById(id);
+        const user: UserEntity = await this.userService.getUserById(id);
         if (user === null) {
             throw new NotFoundException('User is not found');
         }
@@ -64,12 +64,12 @@ export class UsersController {
             throw new BadRequestException('id must be a number');
         }
 
-        const findUser = await this.userService.getUserById(id);
+        const findUser: UserEntity = await this.userService.getUserById(id);
         if (findUser === null) {
             throw new NotFoundException('User is not found');
         }
 
-        const deletedUser = await this.userService.deleteUser(id);
+        const deletedUser: UserEntity = await this.userService.deleteUser(id);
         return plainToInstance(BaseUserResponse, { message: 'User has been deleted', user: deletedUser });
     }
 
@@ -88,7 +88,7 @@ export class UsersController {
             throw new BadRequestException('Request body must not be empty');
         }
 
-        const findUser = await this.userService.getUserById(id);
+        const findUser: UserEntity = await this.userService.getUserById(id);
         if (findUser === null) {
             throw new NotFoundException('User is not found');
         }
@@ -97,7 +97,7 @@ export class UsersController {
             user.password = await this.userService.createHash(user.password);
         }
 
-        const updatedUser = await this.userService.updateUser(id, user);
+        const updatedUser: UserEntity = await this.userService.updateUser(id, user);
         return plainToInstance(BaseUserResponse, { message: 'User has been updated', user: updatedUser });
     }
 }
